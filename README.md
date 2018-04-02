@@ -1,4 +1,4 @@
-# azure-easy-auth-express-local
+# azure-easy-auth-local
 
 Express middleware enabling Azure Easy Auth locally during development and testing.
 
@@ -9,12 +9,12 @@ This is an Express middleware module that enables the local development and debu
 # Installation
 
 ```bash
-npm install --save azure-easy-auth-express-local
+npm install --save azure-easy-auth-local
 ```
 
 ```javascript
 const express = require('express');
-const authLocal = require('azure-easy-auth-express-local');
+const authLocal = require('azure-easy-auth-local');
 
 // The following two constants could be in your configuration file.
 const azureHost = 'myapp.azurewebsites.net';
@@ -107,7 +107,7 @@ Obviously, there is no solution because you can't change the internal Easy Auth 
 ### Solution
 
 1. **IMPORTANT** *Remove all CORS origins that you may have added in the Azure portal.* If you have any entries here, this CORS headers created by this middleware will not be sent.
-2. Add this `asure-easy-auth-express-local` module to your Express app.
+2. Add this `asure-easy-auth-local` middleware module to your Express app.
 3. Deploy it to Azure.
 4. Change your fully-qualified endpoint calls in your JavaScript back to the simple relative URLs (`/.auth/me` and `/.auth/refresh`).
 5. Run this same app locally (`npm start`).
