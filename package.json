@@ -1,6 +1,6 @@
 {
   "name": "azure-easy-auth-local",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Express middleware enabling Azure Easy Auth locally during development and testing.",
   "main": "azure-easy-auth-local.js",
   "scripts": {
