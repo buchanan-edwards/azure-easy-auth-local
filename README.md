@@ -2,7 +2,7 @@
 
 Express middleware enabling Azure Easy Auth locally during development and testing.
 
-Version 1.0.2
+Version 1.0.3
 
 # Overview
 
@@ -128,7 +128,7 @@ It works on the principle that it is deployed both in Azure and is also running 
 2. The local variant of this middleware responds with a 302 (Redirect) to the corresponding URL at `https://myapp.azurewebsites.net/auth/me`. Notice that this URL *does not* have the dot prefix on the `auth` path.
 3. The Azure variant of this middleware response to the non-dotted endpoint, takes the cookie from the header, and makes the request *on your behalf* to the *actual* `https://myapp.azurewebsites.net/.auth/me` endpoint.
 4. The Azure variant of this middleware then sends back the Easy Auth response *along with all the required CORS headers* so your browser is happy.
-5. Your locally-running app is non-the-wiser thinking it successfully is running in Azure and was able to access the `/.auth/me` endpoint.
+5. Your locally-running app is none-the-wiser thinking it successfully is running in Azure and was able to access the `/.auth/me` endpoint.
 
 That's a lot of verbiage for a very simple solution. However, the problem is a bit harder and this imaginary dialog was required to illustrate its complexities. Hopefully, this will resolve the same situation for you as it did for me. You can now:
 

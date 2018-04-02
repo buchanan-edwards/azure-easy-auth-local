@@ -1,5 +1,5 @@
 /**
- * @module easy-auth-local.js
+ * @module azure-easy-auth-local.js
  *
  * This auth middleware is only used to support development on the localhost.
  * When deployed, the /.auth endpoints, such as /.auth/me and /.auth/refresh,
