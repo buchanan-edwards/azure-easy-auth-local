@@ -112,23 +112,23 @@ Obviously, there is no solution because you can't change the internal Easy Auth 
 
 1.  **IMPORTANT** _Remove all CORS origins that you may have added in the Azure portal._ If you have any entries here, the CORS headers created by this middleware will not be sent.
 2.  Add this `asure-easy-auth-local` middleware module to your Express app.
-3.  Deploy it to Azure.
+3.  Deploy your app to Azure.
 4.  Change your fully-qualified endpoint calls in your JavaScript back to the simple relative URLs (`/.auth/me` and `/.auth/refresh`).
-5.  Run this same app locally (`npm start`).
+5.  Run your same app locally (`npm start`).
 6.  Sign into your app on Azure to get the browser cookie.
 7.  Access your web app locally and watch everything work.
 
-Your developers only need to do steps 6 and 7 during development.
+Your developers only need to do steps 5, 6, and 7 during development.
 
 # Internals
 
-What does this middleware module actually do that solves this problem?
+How does the `azure-easy-auth-local` middleware module solve this problem?
 
 It works on the principle that it is deployed both in Azure and is also running locally. Here is the flow:
 
 1.  Your web app JavaScript tries to access the `/.auth/me` endpoint locally.
 2.  The local variant of this middleware responds with a 302 (Redirect) to the corresponding URL at `https://myapp.azurewebsites.net/auth/me`. Notice that this URL _does not_ have the dot prefix on the `auth` path.
-3.  The Azure variant of this middleware response to the non-dotted endpoint, takes the cookie from the header, and makes the request _on your behalf_ to the _actual_ `https://myapp.azurewebsites.net/.auth/me` endpoint.
+3.  The Azure variant of this middleware response to the non-dotted endpoint, takes the cookie from the header, and proxies the request _on your behalf_ to the _actual_ `https://myapp.azurewebsites.net/.auth/me` endpoint.
 4.  The Azure variant of this middleware then sends back the Easy Auth response _along with all the required CORS headers_ so your browser is happy.
 5.  Your locally-running app is none-the-wiser thinking it successfully is running in Azure and was able to access the `/.auth/me` endpoint.
 
