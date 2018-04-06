@@ -60,6 +60,12 @@ const axios = require('axios');
 const APPLICATION_JSON = 'application/json';
 const APP_SERVICE_AUTH_SESSION = 'AppServiceAuthSession';
 
+const DEV_MODE_ERR_MSG = `\
+It looks like you are in development mode and are probably running on your \
+localhost. You must first sign into your Azure web site so the appropriate \
+cookies are set. In production mode, when running on Azure, you would have \
+automatically been redirected to a login page.`;
+
 /**
  * Proxies the request to the host with the auth session cookie.
  * For example, GET /auth/me (without the initial .) is proxied
@@ -87,6 +93,12 @@ function proxyRequest(req, host) {
     })
     .catch(err => {
       const code = err.response ? err.response.status : 500;
+      // Assume that all redirects are redirects to the Microsoft login page.
+      // Turn these into 401 responses so that they can be handled using XHR.
+      if (code === 302) {
+        code = 401;
+        err.message = DEV_MODE_ERR_MSG;
+      }
       err = new Error(err.message);
       err.code = code;
       return Promise.reject(err);

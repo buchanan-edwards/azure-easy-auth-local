@@ -2,11 +2,13 @@
 
 Express middleware enabling Azure Easy Auth locally during development and testing.
 
-Version 1.0.3
+Version 1.0.4
 
 # Overview
 
-This is an Express middleware module that enables the local development and debugging of applications deployed to Azure and secured with the App Service Authentication / Authorization feature, also known as *Easy Auth*. It lets you have all of the Easy Auth features available to you locally, while working on your development machine, without having to constantly deploy your application to Azure.
+This is an Express middleware module that enables the local development and debugging of applications deployed to Azure and secured with the App Service Authentication / Authorization feature, also known as _Easy Auth_. It lets you have all of the Easy Auth features available to you locally, while working on your development machine, without having to constantly deploy your application to Azure.
+
+It also makes your JavaScript cleaner by trapping all 302 (Redirect) responses and returning a 401 (Unauthorized) response when running in local development mode. This is required because browsers do not follow XHR redirect responses from different origins. Since you are running on your localhost during development, _all_ redirects from the Microsoft login service will violate the [same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy).
 
 # Installation
 
@@ -36,7 +38,7 @@ app.listen(process.env.PORT || localPort);
 In your web application, you can get the access token and the user's claims using the `/.auth/me` endpoint (provided by Easy Auth). If the token has expired, you can refresh it using the `/.auth/refresh` endpoint. If you are not yet signed in, Easy Auth will redirect you to the federated login page. Once signed in, your browser will have an `AppServiceAuthSession` cookie that these endpoints will use to authenticate you.
 
 ```javascript
-axios.get('/.auth/me', { withCredentials: true}).then(response => {
+axios.get('/.auth/me', { withCredentials: true }).then(response => {
   const accessToken = response.data.access_token;
   // Call backend APIs using this access token.
 });
@@ -52,13 +54,13 @@ But ultimately, what you want - especially if accessing back-end services such a
 
 The short answer is, because it has to be. The OAuth 2.0 dance that is done by any authenication framework, Azure or otherwise, is non-trivial. The Azure App Service Easy Auth framework makes it easy by abstracting all of the token acquisition logic out of your application and into the Azure App Service framework. That's very convenient, until you want to make it work and test it on your local develoment machine located, of course, outside of this framework. Here is how this flow works for your application once deployed to Azure:
 
-1. Your user tries to access your application but is not yet signed in.
-2. They are redirected to the federated Microsoft login page.
-3. After successfully signing in, they receive an `AppServiceAuthSession` cookie and are allowed to access your application.
-4. Within the JavaScript of your web application, you can call the `/.auth/me` endpoint to get an access token that you can then use as the bearer token when accessing your Express APIs.
-5. Your Express APIs can grab this access token and access other APIs such as the Graph API on the user's behalf.
-6. If the access token expires, your JavaScript can access the `/.auth/refresh` endpoint followed by another call to the `/.auth/me` endpoint to get the refreshed token.
-7. You can easily sign out by having a `Sign Out` button in your app call the `/.auth/logout` endpoint.
+1.  Your user tries to access your application but is not yet signed in.
+2.  They are redirected to the federated Microsoft login page.
+3.  After successfully signing in, they receive an `AppServiceAuthSession` cookie and are allowed to access your application.
+4.  Within the JavaScript of your web application, you can call the `/.auth/me` endpoint to get an access token that you can then use as the bearer token when accessing your Express APIs.
+5.  Your Express APIs can grab this access token and access other APIs such as the Graph API on the user's behalf.
+6.  If the access token expires, your JavaScript can access the `/.auth/refresh` endpoint followed by another call to the `/.auth/me` endpoint to get the refreshed token.
+7.  You can easily sign out by having a `Sign Out` button in your app call the `/.auth/logout` endpoint.
 
 All of these details (included in the Azure Active Directory Authentication Library - ADAL) are now handled by the Easy Auth framework. All you need to do is make a few GET requests from your web application and the magic is taken care of behind the scenes.
 
@@ -68,7 +70,7 @@ Now you want to run your application on your local development machine...
 
 There's the first problem: there is no `/.auth/me` endpoint! That's OK, you say, I will simply access it directly from my web application by using the fully-qualified URL. So, I'll change my `axios.get` request to `GET https://myapp.azurewebsites.net/.auth/me` (instead of `GET /.auth/me`) and receive my access token that way.
 
-Now, assuming you've *already signed into the Azure version of your app*, the cookies will be forwarded because `withCredentials` is set to `true`.
+Now, assuming you've _already signed into the Azure version of your app_, the cookies will be forwarded because `withCredentials` is set to `true`.
 
 Suddenly your browser rewards you with a CORS policy violation.
 
@@ -100,21 +102,21 @@ Setting the CORS Allowed Origins in the Azure portal only fixes the `Access-Cont
 
 Obviously, there is no solution because you can't change the internal Easy Auth infrastructure driven by the Azure portal. You start writing all of this down because it is becoming a nightmare:
 
-1. I want to access the remote `https://myapp.azurewebsites.net/.auth/me` endpoint to get my access token.
-2. I want to do it from my localhost during development. I know that I need to do this `withCredentials` so the `AppServiceAuthSession` cookie is sent.
-3. The CORS policy prevents me from doing this and I don't want my developers to always run their browser with security disabled, which is more difficult if we are testing with Edge.
-4. I can't use the Azure portal CORS feature because it only sets one of the required headers and not the one that allows my browser to send the cookie.
-5. I give up.
+1.  I want to access the remote `https://myapp.azurewebsites.net/.auth/me` endpoint to get my access token.
+2.  I want to do it from my localhost during development. I know that I need to do this `withCredentials` so the `AppServiceAuthSession` cookie is sent.
+3.  The CORS policy prevents me from doing this and I don't want my developers to always run their browser with security disabled, which is more difficult if we are testing with Edge.
+4.  I can't use the Azure portal CORS feature because it only sets one of the required headers and not the one that allows my browser to send the cookie.
+5.  I give up.
 
 ### Solution
 
-1. **IMPORTANT** *Remove all CORS origins that you may have added in the Azure portal.* If you have any entries here, the CORS headers created by this middleware will not be sent.
-2. Add this `asure-easy-auth-local` middleware module to your Express app.
-3. Deploy it to Azure.
-4. Change your fully-qualified endpoint calls in your JavaScript back to the simple relative URLs (`/.auth/me` and `/.auth/refresh`).
-5. Run this same app locally (`npm start`).
-6. Sign into your app on Azure to get the browser cookie.
-7. Access your web app locally and watch everything work.
+1.  **IMPORTANT** _Remove all CORS origins that you may have added in the Azure portal._ If you have any entries here, the CORS headers created by this middleware will not be sent.
+2.  Add this `asure-easy-auth-local` middleware module to your Express app.
+3.  Deploy it to Azure.
+4.  Change your fully-qualified endpoint calls in your JavaScript back to the simple relative URLs (`/.auth/me` and `/.auth/refresh`).
+5.  Run this same app locally (`npm start`).
+6.  Sign into your app on Azure to get the browser cookie.
+7.  Access your web app locally and watch everything work.
 
 Your developers only need to do steps 6 and 7 during development.
 
@@ -124,11 +126,11 @@ What does this middleware module actually do that solves this problem?
 
 It works on the principle that it is deployed both in Azure and is also running locally. Here is the flow:
 
-1. Your web app JavaScript tries to access the `/.auth/me` endpoint locally.
-2. The local variant of this middleware responds with a 302 (Redirect) to the corresponding URL at `https://myapp.azurewebsites.net/auth/me`. Notice that this URL *does not* have the dot prefix on the `auth` path.
-3. The Azure variant of this middleware response to the non-dotted endpoint, takes the cookie from the header, and makes the request *on your behalf* to the *actual* `https://myapp.azurewebsites.net/.auth/me` endpoint.
-4. The Azure variant of this middleware then sends back the Easy Auth response *along with all the required CORS headers* so your browser is happy.
-5. Your locally-running app is none-the-wiser thinking it successfully is running in Azure and was able to access the `/.auth/me` endpoint.
+1.  Your web app JavaScript tries to access the `/.auth/me` endpoint locally.
+2.  The local variant of this middleware responds with a 302 (Redirect) to the corresponding URL at `https://myapp.azurewebsites.net/auth/me`. Notice that this URL _does not_ have the dot prefix on the `auth` path.
+3.  The Azure variant of this middleware response to the non-dotted endpoint, takes the cookie from the header, and makes the request _on your behalf_ to the _actual_ `https://myapp.azurewebsites.net/.auth/me` endpoint.
+4.  The Azure variant of this middleware then sends back the Easy Auth response _along with all the required CORS headers_ so your browser is happy.
+5.  Your locally-running app is none-the-wiser thinking it successfully is running in Azure and was able to access the `/.auth/me` endpoint.
 
 That's a lot of verbiage for a very simple solution. However, the problem is a bit harder and this imaginary dialog was required to illustrate its complexities. Hopefully, this will resolve the same situation for you as it did for me. You can now:
 
