@@ -64,7 +64,7 @@ const DEV_MODE_ERR_MSG = `\
 It looks like you are in development mode and are probably running on your \
 localhost. You must first sign into your Azure web site so the appropriate \
 cookies are set. In production mode, when running on Azure, you would have \
-automatically been redirected to a login page.`;
+automatically been redirected to the login page.`;
 
 /**
  * Proxies the request to the host with the auth session cookie.
