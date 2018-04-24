@@ -1,6 +1,6 @@
 {
   "name": "azure-easy-auth-local",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Express middleware enabling Azure Easy Auth locally during development and testing.",
   "main": "azure-easy-auth-local.js",
   "scripts": {
@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/buchanan-edwards/azure-easy-auth-local#readme",
   "dependencies": {
-    "axios": "^0.18.0"
+    "axios": "^0.18.0",
+    "cookie": "^0.3.1"
   }
 }

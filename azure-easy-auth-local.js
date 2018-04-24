@@ -56,6 +56,7 @@
 'use strict';
 
 const axios = require('axios');
+const cookie = require('cookie');
 
 const APPLICATION_JSON = 'application/json';
 const APP_SERVICE_AUTH_SESSION = 'AppServiceAuthSession';
@@ -67,7 +68,8 @@ const APP_SERVICE_AUTH_SESSION = 'AppServiceAuthSession';
  * Azure endpoint that can handle the request.
  */
 function proxyRequest(req, host) {
-  const session = req.cookies[APP_SERVICE_AUTH_SESSION];
+  const cookies = cookie.parse(req.headers.cookie || '');
+  const session = cookies[APP_SERVICE_AUTH_SESSION];
   if (!session) {
     const err = new Error(`No ${APP_SERVICE_AUTH_SESSION} cookie in request.`);
     err.code = 400;
