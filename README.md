@@ -2,7 +2,7 @@
 
 Express middleware enabling Azure Easy Auth locally during development and testing.
 
-Version 1.0.6
+Version 1.0.7
 
 # Overview
 
