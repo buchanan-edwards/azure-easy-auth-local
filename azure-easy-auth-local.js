@@ -64,10 +64,14 @@ const APP_SERVICE_AUTH_SESSION = 'AppServiceAuthSession';
 /**
  * Proxies the request to the host with the auth session cookie.
  * For example, GET /auth/me (without the initial .) is proxied
- * to GET http://{host}/.auth/me (with the initial .), the real
+ * to GET http://{azureHost}/.auth/me (with the initial .), the real
  * Azure endpoint that can handle the request.
+ * 
+ * @param req request object
+ * @param azureHost host name of azure app service
+ * 
  */
-function proxyRequest(req, host) {
+function proxyRequest(req, azureHost) {
   const cookies = cookie.parse(req.headers.cookie || '');
   const session = cookies[APP_SERVICE_AUTH_SESSION];
   if (!session) {
@@ -75,7 +79,7 @@ function proxyRequest(req, host) {
     err.code = 400;
     return Promise.reject(err);
   }
-  const url = `https://${host}/.${req.url.substr(1)}`;
+  const url = `https://${azureHost}/.${req.url.substr(1)}`;
   return axios({
     method: 'GET',
     url: url,
@@ -97,18 +101,26 @@ function proxyRequest(req, host) {
 
 /**
  * Adds the CORS headers that allow access by the local host.
+ * 
+ * @param res response object
+ * @param localOrigin local origin for CORS headers
+ * 
  */
-function corsHeaders(res, port) {
+function corsHeaders(res, localOrigin) {
   res.set('Access-Control-Allow-Credentials', 'true');
-  res.set('Access-Control-Allow-Origin', `http://localhost:${port}`);
+  res.set('Access-Control-Allow-Origin', localOrigin);
   res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
 }
 
 /**
  * Returns a middleware function that will proxy requests to the
  * specified host.
+ * 
+ * @param azureHost host name of the app service
+ * @param localOrigin origin for CORS headers
+ * 
  */
-function middleware(azureHost, localPort) {
+function middleware(azureHost, localOrigin) {
   return function(req, res, next) {
     const { method, url } = req;
     if (method === 'GET') {
@@ -117,7 +129,7 @@ function middleware(azureHost, localPort) {
       } else if (url.startsWith('/auth/')) {
         proxyRequest(req, azureHost)
           .then(data => {
-            corsHeaders(res, localPort);
+            corsHeaders(res, localOrigin);
             res.json(data);
           })
           .catch(err => {
@@ -127,7 +139,7 @@ function middleware(azureHost, localPort) {
         next();
       }
     } else if (method === 'OPTIONS' && url.startsWith('/auth/')) {
-      corsHeaders(res, localPort);
+      corsHeaders(res, localOrigin);
       res.status(204);
       res.set('Content-Length', '0');
       res.end();

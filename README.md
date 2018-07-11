@@ -20,7 +20,7 @@ const authLocal = require('azure-easy-auth-local');
 
 // The following two constants could be in your configuration file.
 const azureHost = 'myapp.azurewebsites.net';
-const localPort = 45608;
+const localPort = 'https://localhost:45608';
 
 // This is only an example. Your app would have additional endpoints.
 const app = express();
@@ -28,7 +28,7 @@ const app = express();
 app.use(authLocal(azureHost, localPort));
 
 // Listen on either a pipe (once deployed) or a port (localhost).
-app.listen(process.env.PORT || localPort);
+app.listen(process.env.PORT || 45608);
 ```
 
 # Web Application
