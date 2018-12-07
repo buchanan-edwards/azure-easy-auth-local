@@ -2,7 +2,7 @@
 
 Express middleware enabling Azure Easy Auth locally during development and testing.
 
-Version 1.0.6
+Version 1.0.7
 
 # Overview
 
@@ -20,15 +20,15 @@ const authLocal = require('azure-easy-auth-local');
 
 // The following two constants could be in your configuration file.
 const azureHost = 'myapp.azurewebsites.net';
-const localPort = 45608;
+const localOrigin = 'https://localhost:45608';
 
 // This is only an example. Your app would have additional endpoints.
 const app = express();
 
-app.use(authLocal(azureHost, localPort));
+app.use(authLocal(azureHost, localOrigin));
 
 // Listen on either a pipe (once deployed) or a port (localhost).
-app.listen(process.env.PORT || localPort);
+app.listen(process.env.PORT || 45608);
 ```
 
 # Web Application
