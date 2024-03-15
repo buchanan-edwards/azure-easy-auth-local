@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/buchanan-edwards/azure-easy-auth-local#readme",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "cookie": "^0.3.1"
   }
 }
